@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { analyzeProductUrl, type ProductAnalysisResult, type ActionResponse } from "./actions";
 import { ProductAnalysis } from "@/components/product-analysis";
-import { Loader2, AlertCircle, SearchCode, ExternalLink, ShieldCheck } from "lucide-react";
+import { Loader2, AlertCircle, SearchCode, ExternalLink, ShieldCheck, Github } from "lucide-react";
 import { Toaster } from "@/components/ui/toaster";
 import { useToast } from "@/hooks/use-toast";
 
@@ -66,23 +66,23 @@ export default function HomePage() {
 
   return (
     <>
-      <div className="min-h-screen bg-background text-foreground flex flex-col items-center pt-16 sm:pt-24 pb-20 px-4 sm:px-6 lg:px-8">
-        <header className="mb-12 sm:mb-20 text-center">
+      <div className="min-h-screen bg-gradient-to-br from-background to-muted/30 text-foreground flex flex-col items-center pt-16 sm:pt-20 pb-20 px-4 sm:px-6 lg:px-8">
+        <header className="mb-10 sm:mb-16 text-center">
           <div className="inline-flex items-center justify-center gap-3 mb-4 text-primary">
-             <SearchCode className="h-12 w-12 sm:h-16 sm:w-16" />
-             <h1 className="text-5xl sm:text-6xl font-extrabold tracking-tight">
+             <SearchCode className="h-10 w-10 sm:h-14 sm:w-14" />
+             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-primary via-accent to-primary">
                 Dark Pattern Detector
              </h1>
           </div>
-          <p className="text-lg sm:text-xl text-muted-foreground mt-3 max-w-2xl mx-auto">
-            Shine a light on deceptive e-commerce practices. Enter a product page URL to analyze its design and track price trends.
+          <p className="text-md sm:text-lg text-muted-foreground mt-2 max-w-xl mx-auto">
+            Uncover deceptive design tricks on e-commerce sites. Enter a product URL to analyze its interface and track price history.
           </p>
         </header>
 
-        <Card className="w-full max-w-2xl shadow-xl rounded-xl mb-12">
+        <Card className="w-full max-w-xl shadow-xl rounded-xl bg-card/80 backdrop-blur-sm border-border/50">
           <CardHeader className="pb-4 pt-6">
             <CardTitle className="text-xl sm:text-2xl font-semibold">Analyze Product Page</CardTitle>
-            <CardDescription>Paste the URL of an e-commerce product page below.</CardDescription>
+            <CardDescription>Paste the URL of an e-commerce product page below to begin.</CardDescription>
           </CardHeader>
           <CardContent className="pb-6">
             <form onSubmit={handleSubmit} className="space-y-5">
@@ -91,12 +91,12 @@ export default function HomePage() {
                 placeholder="e.g., https://www.amazon.in/dp/B0ExampleXYZ"
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
-                className="text-base h-12 px-4 rounded-md focus:ring-2 focus:ring-primary"
+                className="text-base h-12 px-4 rounded-lg focus:ring-2 focus:ring-primary/80 bg-background/70 border-border/70"
                 aria-label="Product page URL"
                 disabled={isPending}
                 required
               />
-              <Button type="submit" className="w-full h-12 text-lg font-medium rounded-md gap-2" disabled={isPending}>
+              <Button type="submit" className="w-full h-12 text-lg font-medium rounded-lg gap-2.5 shadow-md hover:shadow-lg transition-shadow bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-primary-foreground" disabled={isPending}>
                 {isPending ? (
                   <>
                     <Loader2 className="mr-2 h-5 w-5 animate-spin" />
@@ -111,7 +111,7 @@ export default function HomePage() {
         </Card>
 
         {error && !isPending && (
-          <Alert variant="destructive" className="w-full max-w-2xl mb-8 shadow-md rounded-lg">
+          <Alert variant="destructive" className="w-full max-w-xl mt-8 shadow-md rounded-lg bg-destructive/10 border-destructive/30">
             <AlertCircle className="h-5 w-5" />
             <AlertTitle className="font-semibold">Analysis Error</AlertTitle>
             <AlertDescription>{error}</AlertDescription>
@@ -119,28 +119,31 @@ export default function HomePage() {
         )}
 
         {analysisResult && !isPending && (
-          <div className="w-full max-w-4xl xl:max-w-5xl mt-4">
+          <div className="w-full max-w-4xl xl:max-w-5xl mt-10">
             <ProductAnalysis analysis={analysisResult} />
           </div>
         )}
         
         {!analysisResult && !error && !isPending && (
-             <div className="w-full max-w-2xl text-center mt-8 p-8 bg-card rounded-xl shadow-lg border border-dashed border-border">
-                <ShieldCheck className="h-16 w-16 text-primary/70 mx-auto mb-4" />
+             <div className="w-full max-w-xl text-center mt-10 p-8 bg-card/50 backdrop-blur-sm rounded-xl shadow-lg border border-dashed border-border/50">
+                <ShieldCheck className="h-14 w-14 text-primary/60 mx-auto mb-4" />
                 <h3 className="text-xl font-semibold text-card-foreground">Ready to Analyze</h3>
                 <p className="text-muted-foreground mt-1">Enter a URL above to reveal insights about product pages and pricing.</p>
             </div>
         )}
       </div>
       <Toaster />
-       <footer className="text-center py-12 border-t border-border bg-muted/30">
+       <footer className="text-center py-10 border-t border-border/50 bg-muted/20">
         <p className="text-sm text-muted-foreground">
           Dark Pattern Detector - Empowering consumers with transparency.
         </p>
-        <p className="text-xs text-muted-foreground mt-1">
-          Created with Next.js, ShadCN/UI, and Genkit AI. 
-          <Link href="https://github.com" target="_blank" rel="noopener noreferrer" className="hover:text-primary hover:underline ml-1 inline-flex items-center">
-            View Source <ExternalLink className="h-3 w-3 ml-0.5"/>
+         <p className="text-sm text-muted-foreground mt-2">
+          The Project is Created By Yasmeen Arifa S
+        </p>
+        <p className="text-xs text-muted-foreground mt-2">
+          Built with Next.js, ShadCN/UI, and Genkit AI.
+          <Link href="https://github.com/FirebaseExtended/codelab-genkit-dark-patterns" target="_blank" rel="noopener noreferrer" className="hover:text-primary hover:underline ml-1.5 inline-flex items-center gap-1">
+            <Github className="h-3.5 w-3.5"/> View Source 
           </Link>
         </p>
       </footer>
