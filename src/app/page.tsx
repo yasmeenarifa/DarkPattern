@@ -2,14 +2,14 @@
 "use client";
 
 import { useState, useTransition, type FormEvent } from 'react';
-import Link from 'next/link'; // Import Next.js Link for internal navigation if needed
+import Link from 'next/link';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { analyzeProductUrl, type ProductAnalysisResult, type ActionResponse } from "./actions";
 import { ProductAnalysis } from "@/components/product-analysis";
-import { Loader2, AlertCircle, SearchCode, ExternalLink } from "lucide-react";
+import { Loader2, AlertCircle, SearchCode, ExternalLink, ShieldCheck } from "lucide-react";
 import { Toaster } from "@/components/ui/toaster";
 import { useToast } from "@/hooks/use-toast";
 
@@ -34,7 +34,6 @@ export default function HomePage() {
       });
       return;
     }
-    // Basic URL validation hint
     if (!url.startsWith('http://') && !url.startsWith('https://')) {
       setError("Invalid URL format. Please include http:// or https://");
        toast({
@@ -44,7 +43,6 @@ export default function HomePage() {
       });
       return;
     }
-
 
     startTransition(async () => {
       const response: ActionResponse = await analyzeProductUrl(url);
@@ -68,25 +66,25 @@ export default function HomePage() {
 
   return (
     <>
-      <div className="min-h-screen bg-background text-foreground flex flex-col items-center pt-12 pb-20 px-4 sm:px-6 lg:px-8">
-        <header className="mb-10 sm:mb-16 text-center">
+      <div className="min-h-screen bg-background text-foreground flex flex-col items-center pt-16 sm:pt-24 pb-20 px-4 sm:px-6 lg:px-8">
+        <header className="mb-12 sm:mb-20 text-center">
           <div className="inline-flex items-center justify-center gap-3 mb-4 text-primary">
-             <SearchCode className="h-10 w-10 sm:h-12 sm:w-12" />
-             <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight">
+             <SearchCode className="h-12 w-12 sm:h-16 sm:w-16" />
+             <h1 className="text-5xl sm:text-6xl font-extrabold tracking-tight">
                 Dark Pattern Detector
              </h1>
           </div>
-          <p className="text-lg sm:text-xl text-muted-foreground mt-2 max-w-2xl mx-auto">
+          <p className="text-lg sm:text-xl text-muted-foreground mt-3 max-w-2xl mx-auto">
             Shine a light on deceptive e-commerce practices. Enter a product page URL to analyze its design and track price trends.
           </p>
         </header>
 
-        <Card className="w-full max-w-2xl shadow-2xl rounded-xl mb-12">
-          <CardHeader className="pb-4">
+        <Card className="w-full max-w-2xl shadow-xl rounded-xl mb-12">
+          <CardHeader className="pb-4 pt-6">
             <CardTitle className="text-xl sm:text-2xl font-semibold">Analyze Product Page</CardTitle>
             <CardDescription>Paste the URL of an e-commerce product page below.</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pb-6">
             <form onSubmit={handleSubmit} className="space-y-5">
               <Input
                 type="url"
@@ -127,15 +125,15 @@ export default function HomePage() {
         )}
         
         {!analysisResult && !error && !isPending && (
-             <div className="w-full max-w-2xl text-center mt-8 p-8 bg-card rounded-xl shadow-lg border border-dashed border-border/70">
-                <SearchCode className="h-16 w-16 text-muted-foreground/70 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-foreground">Ready to Analyze</h3>
-                <p className="text-muted-foreground mt-1">Enter a URL above to reveal insights about product pages.</p>
+             <div className="w-full max-w-2xl text-center mt-8 p-8 bg-card rounded-xl shadow-lg border border-dashed border-border">
+                <ShieldCheck className="h-16 w-16 text-primary/70 mx-auto mb-4" />
+                <h3 className="text-xl font-semibold text-card-foreground">Ready to Analyze</h3>
+                <p className="text-muted-foreground mt-1">Enter a URL above to reveal insights about product pages and pricing.</p>
             </div>
         )}
       </div>
       <Toaster />
-       <footer className="text-center py-8 border-t border-border">
+       <footer className="text-center py-12 border-t border-border bg-muted/30">
         <p className="text-sm text-muted-foreground">
           Dark Pattern Detector - Empowering consumers with transparency.
         </p>
