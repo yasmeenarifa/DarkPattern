@@ -1,3 +1,4 @@
+
 // src/components/product-analysis.tsx
 "use client";
 
@@ -5,9 +6,10 @@ import type { ProductAnalysisResult } from "@/app/actions";
 import Image from "next/image";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { DarkPatternCard } from "./dark-pattern-card";
+import { TrickyOfferCard } from "./tricky-offer-card";
 import { PriceHistoryChart } from "./price-history-chart";
 import { DarkPatternsSummaryChart } from "./dark-patterns-summary-chart";
-import { LinkIcon, ScanEye, AreaChart, AlertOctagon, BarChart3, ShieldAlert } from "lucide-react"; 
+import { LinkIcon, ScanEye, AreaChart, AlertOctagon, BarChart3, Gift, MessageSquareQuote, Info } from "lucide-react"; 
 
 interface ProductAnalysisProps {
   analysis: ProductAnalysisResult;
@@ -15,20 +17,26 @@ interface ProductAnalysisProps {
 
 export function ProductAnalysis({ analysis }: ProductAnalysisProps) {
   const hasDarkPatterns = analysis.darkPatterns && analysis.darkPatterns.length > 0;
+  const hasTrickyOffers = analysis.trickyOffers && analysis.trickyOffers.length > 0;
 
   return (
     <div className="space-y-10">
       <Card className="overflow-hidden shadow-2xl rounded-xl bg-card/90 backdrop-blur-md border-border/60">
         <CardHeader className="bg-gradient-to-br from-secondary/40 to-secondary/20 p-6 md:p-8 border-b border-border/50">
           <div className="flex flex-col lg:flex-row gap-6 items-start">
-            <div className="relative w-full lg:w-2/5 aspect-[16/10] rounded-lg overflow-hidden border-2 border-border/30 shadow-lg transition-all hover:scale-[1.02] duration-300">
+            <div className="relative w-full lg:w-2/5 aspect-[16/10] rounded-lg overflow-hidden border-2 border-border/30 shadow-lg transition-all hover:scale-[1.02] duration-300 bg-muted/20">
               <Image
                 src={analysis.productImage}
                 alt={analysis.productName}
                 fill
-                className="object-cover"
-                data-ai-hint="product package"
+                className="object-contain" // Changed to object-contain for better image display
+                data-ai-hint="product image" // Generic hint for actual product or placeholder
                 sizes="(max-width: 768px) 100vw, (max-width: 1024px) 40vw, 33vw"
+                onError={(e) => {
+                  // Fallback to placeholder if the primary image fails to load
+                  e.currentTarget.srcset = 'https://placehold.co/600x400.png';
+                  e.currentTarget.src = 'https://placehold.co/600x400.png';
+                }}
               />
             </div>
             <div className="flex-1 pt-1 lg:pt-2">
@@ -78,6 +86,38 @@ export function ProductAnalysis({ analysis }: ProductAnalysisProps) {
               <DarkPatternsSummaryChart darkPatterns={analysis.darkPatterns} />
             </section>
           )}
+
+          <section>
+            <h2 className="text-2xl font-semibold mb-6 flex items-center gap-3 text-rose-500 dark:text-rose-400">
+              <Gift className="h-7 w-7" />
+              Potentially Tricky Offers
+            </h2>
+            {hasTrickyOffers ? (
+              <div className="space-y-6">
+                {analysis.trickyOffers.map((offer, index) => (
+                  <TrickyOfferCard key={index} offer={offer} />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-10 px-4 border-2 border-dashed rounded-lg bg-muted/30">
+                <ScanEye className="h-12 w-12 text-muted-foreground/60 mx-auto mb-3" />
+                <p className="text-lg text-foreground font-medium">No Tricky Offers Detected</p>
+                <p className="text-sm text-muted-foreground mt-1.5">Our analysis did not find any offers that match common 'tricky' criteria on this page.</p>
+              </div>
+            )}
+          </section>
+          
+          <section>
+             <h2 className="text-2xl font-semibold mb-6 flex items-center gap-3 text-teal-500 dark:text-teal-400">
+                <MessageSquareQuote className="h-7 w-7" />
+                User Review Analysis
+            </h2>
+            <div className="text-center py-10 px-4 border-2 border-dashed rounded-lg bg-muted/30">
+                <Info className="h-12 w-12 text-muted-foreground/60 mx-auto mb-3" />
+                <p className="text-lg text-foreground font-medium">Review Analysis Coming Soon</p>
+                <p className="text-sm text-muted-foreground mt-1.5">This feature requires review text input or advanced page parsing. The current analysis focuses on URL-based detection of dark patterns and tricky offers.</p>
+            </div>
+          </section>
 
           <section>
              <h2 className="text-2xl font-semibold mb-6 flex items-center gap-3 text-primary">
