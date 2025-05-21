@@ -41,8 +41,8 @@ export function PriceHistoryChart({ priceHistory }: PriceHistoryChartProps) {
   return (
     <Card className="shadow-md">
       <CardHeader>
-        <CardTitle>Price History</CardTitle>
-        <CardDescription>Price fluctuations over the last 30 days from available sources.</CardDescription>
+        <CardTitle>Price Tracker</CardTitle>
+        <CardDescription>Illustrative price fluctuations over the last 30 days from mock data sources.</CardDescription>
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig} className="h-[350px] w-full">
@@ -52,7 +52,7 @@ export function PriceHistoryChart({ priceHistory }: PriceHistoryChartProps) {
             margin={{
               top: 5,
               right: 20,
-              left: 0,
+              left: 20, // Increased left margin for Y-axis labels
               bottom: 5,
             }}
           >
@@ -88,7 +88,12 @@ export function PriceHistoryChart({ priceHistory }: PriceHistoryChartProps) {
                 formatter={(value, name) => {
                     const configEntry = chartConfig[name as keyof typeof chartConfig];
                     const label = configEntry ? configEntry.label : name;
-                    return [ `₹${Number(value).toFixed(2)}`, label];
+                    // Ensure value is a number before calling toFixed
+                    const numericValue = Number(value);
+                    if (isNaN(numericValue)) {
+                        return [value, label]; // Return original value if not a number
+                    }
+                    return [ `₹${numericValue.toFixed(2)}`, label];
                 }}
                 labelFormatter={(label) => new Date(label + "T00:00:00").toLocaleDateString("en-IN", { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })}
             />
@@ -119,3 +124,4 @@ export function PriceHistoryChart({ priceHistory }: PriceHistoryChartProps) {
     </Card>
   );
 }
+
