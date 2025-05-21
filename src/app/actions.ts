@@ -37,7 +37,7 @@ const generateMockPriceHistory = (days: number): PricePoint[] => {
     const date = new Date(today);
     date.setDate(today.getDate() - i);
     
-    if (Math.random() > 0.2) {
+    if (Math.random() > 0.2) { // Simulate data availability
         const amazonPrice = Math.floor(Math.random() * (5000 - 500 + 1)) + 500;
         history.push({
             date: date.toISOString().split('T')[0],
@@ -46,7 +46,7 @@ const generateMockPriceHistory = (days: number): PricePoint[] => {
         });
     }
 
-    if (Math.random() > 0.2) {
+    if (Math.random() > 0.2) { // Simulate data availability
         const flipkartPrice = Math.floor(Math.random() * (4800 - 450 + 1)) + 450;
         history.push({
             date: date.toISOString().split('T')[0],
@@ -60,6 +60,44 @@ const generateMockPriceHistory = (days: number): PricePoint[] => {
     if (dateComparison !== 0) return dateComparison;
     return a.source.localeCompare(b.source);
   });
+};
+
+const extractProductName = (url: string): string => {
+    try {
+        const urlObj = new URL(url);
+        let name = urlObj.hostname.replace(/^www\./, '');
+        
+        const pathSegments = urlObj.pathname.split('/').filter(segment => 
+            segment && 
+            !segment.match(/^(dp|gp|product|products|item|items|review|reviews|offer|offers)$/i) && // Ignore common path slugs
+            !segment.match(/^[a-zA-Z0-9]{8,}$/) && // Ignore potential long IDs
+            !segment.match(/\.(html|htm|php|aspx?)$/i) // Ignore file extensions
+        );
+
+        if (pathSegments.length > 0) {
+            // Prefer longer, more descriptive segments, and join a few if they seem relevant
+            const potentialNames = pathSegments
+                .map(segment => segment.replace(/-/g, ' ').replace(/_/g, ' '))
+                .filter(segment => segment.length > 3 && !segment.match(/^\d+$/)) // filter out short or numeric only segments
+                .map(segment => segment.replace(/\b\w/g, l => l.toUpperCase())); // Capitalize
+            
+            if (potentialNames.length > 0) {
+                 // Take the last one or two meaningful segments
+                name = potentialNames.slice(-2).join(' - ') ;
+            } else {
+                name = urlObj.hostname.replace(/^www\./, '') + " Product";
+            }
+        } else {
+            name = urlObj.hostname.replace(/^www\./, '') + " Product";
+        }
+        // Further clean up
+        name = name.split('?')[0]; // Remove query params from name
+        return name;
+
+    } catch (e) {
+        console.warn('Error extracting product name:', e);
+        return "Analyzed Product";
+    }
 };
 
 
@@ -76,38 +114,54 @@ export async function analyzeProductUrl(url: string): Promise<ActionResponse> {
     let pageHtml = '';
     let productImage = `https://placehold.co/600x400.png`; // Default placeholder
     try {
+        // Use a common user-agent to mimic a browser
         const response = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36' } });
         if (response.ok) {
             pageHtml = await response.text();
-            // Try to extract og:image
+            // Try to extract og:image first, as it's often the preferred image
             const ogImageMatch = pageHtml.match(/<meta\s+(?:property|name)="og:image"\s+content="([^"]+)"\s*\/?>/i);
             if (ogImageMatch && ogImageMatch[1]) {
                 productImage = ogImageMatch[1];
             } else {
-                 // Try to extract a high-quality image from ld+json
-                const ldJsonImageMatch = pageHtml.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/i);
-                if (ldJsonImageMatch && ldJsonImageMatch[1]) {
-                    try {
-                        const ldJson = JSON.parse(ldJsonImageMatch[1]);
-                        // Common structures for product image in ld+json
-                        const imageSources = [
-                            ldJson.image,
-                            ldJson.logo,
-                            Array.isArray(ldJson.image) ? ldJson.image[0] : null,
-                            (ldJson.mainEntity && ldJson.mainEntity.image) ? ldJson.mainEntity.image.url : null,
-                            (ldJson.offers && ldJson.offers.image) ? ldJson.offers.image : null,
-                        ];
-                        for (const src of imageSources) {
-                            if (typeof src === 'string' && src.startsWith('http')) {
-                                productImage = src;
-                                break;
-                            } else if (typeof src === 'object' && src !== null && typeof src.url === 'string' && src.url.startsWith('http')) {
-                                productImage = src.url;
-                                break;
+                 // Fallback: Try to extract a high-quality image from ld+json if og:image is not found
+                const ldJsonImageMatch = pageHtml.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/ig);
+                if (ldJsonImageMatch) {
+                    for (const scriptContent of ldJsonImageMatch) {
+                        const match = scriptContent.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/i);
+                        if (match && match[1]) {
+                            try {
+                                const ldJson = JSON.parse(match[1]);
+                                // Common structures for product image in ld+json
+                                // Can be a string, an object with url, or an array of these
+                                const imageSources = [
+                                    ldJson.image,
+                                    ldJson.logo,
+                                    Array.isArray(ldJson.image) ? ldJson.image[0] : null,
+                                    (ldJson.mainEntity && ldJson.mainEntity.image) ? ldJson.mainEntity.image : null,
+                                    (ldJson.offers && ldJson.offers.image) ? ldJson.offers.image : null,
+                                ];
+                                for (let src of imageSources) {
+                                    if (typeof src === 'string' && src.startsWith('http')) {
+                                        productImage = src;
+                                        break; // Found a good image
+                                    } else if (Array.isArray(src)) { // Handle cases where image is an array
+                                        const firstImage = src.find(img => typeof img === 'string' && img.startsWith('http')) || 
+                                                           src.find(img => typeof img === 'object' && img && typeof img.url === 'string' && img.url.startsWith('http'));
+                                        if (firstImage) {
+                                            productImage = typeof firstImage === 'string' ? firstImage : firstImage.url;
+                                            break;
+                                        }
+                                    } else if (typeof src === 'object' && src !== null && typeof src.url === 'string' && src.url.startsWith('http')) {
+                                        productImage = src.url;
+                                        break; // Found a good image
+                                    }
+                                }
+                                if (productImage !== `https://placehold.co/600x400.png`) break; // Exit if a non-placeholder image is found
+                            } catch (e) {
+                                console.warn('Failed to parse LD+JSON for image extraction:', e);
+                                // Continue to next script tag if parsing fails
                             }
                         }
-                    } catch (e) {
-                        console.warn('Failed to parse LD+JSON for image extraction:', e);
                     }
                 }
             }
@@ -134,21 +188,8 @@ export async function analyzeProductUrl(url: string): Promise<ActionResponse> {
     if (trickyOffersResponse.status === 'rejected') {
         console.error('Error detecting tricky offers:', trickyOffersResponse.reason);
     }
-
-    const urlObj = new URL(url);
-    let productName = urlObj.hostname.replace(/^www\./, '');
-    if (urlObj.pathname && urlObj.pathname !== '/') {
-        const pathParts = urlObj.pathname.split('/').filter(part => part.length > 0);
-        if (pathParts.length > 0) {
-            let extractedName = pathParts[pathParts.length - 1].replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-            // Remove common extensions or query params often found in product URLs
-            extractedName = extractedName.split('.')[0].split('?')[0];
-            productName += ` - ${extractedName}`;
-        }
-    } else {
-        productName += " Product";
-    }
     
+    const productName = extractProductName(url);
 
     const result: ProductAnalysisResult = {
       url,
@@ -174,3 +215,4 @@ export async function analyzeProductUrl(url: string): Promise<ActionResponse> {
     return { error: errorMessage };
   }
 }
+

@@ -1,3 +1,4 @@
+
 // src/app/page.tsx
 "use client";
 
@@ -9,7 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { analyzeProductUrl, type ProductAnalysisResult, type ActionResponse } from "./actions";
 import { ProductAnalysis } from "@/components/product-analysis";
-import { Loader2, AlertCircle, SearchCode, ExternalLink, ShieldCheck, Github } from "lucide-react";
+import { Loader2, AlertCircle, SearchCode, ShieldCheck, Github } from "lucide-react";
 import { Toaster } from "@/components/ui/toaster";
 import { useToast } from "@/hooks/use-toast";
 

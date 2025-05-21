@@ -1,7 +1,7 @@
 // src/components/dark-pattern-card.tsx
 import type { DetectDarkPatternsOutput } from "@/ai/flows/detect-dark-patterns";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { AlertTriangle, Info, ShieldAlert } from "lucide-react";
+import { ShieldAlert, Info } from "lucide-react";
 
 type DarkPattern = DetectDarkPatternsOutput[0];
 
