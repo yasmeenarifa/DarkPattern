@@ -9,7 +9,7 @@ import { DarkPatternCard } from "./dark-pattern-card";
 import { TrickyOfferCard } from "./tricky-offer-card";
 import { PriceHistoryChart } from "./price-history-chart";
 import { DarkPatternsSummaryChart } from "./dark-patterns-summary-chart";
-import { LinkIcon, ScanEye, AreaChart, AlertOctagon, BarChart3, Gift, MessageSquareQuote, Info } from "lucide-react"; 
+import { LinkIcon, ScanEye, AreaChart, AlertOctagon, BarChart3, Gift, MessageSquareQuote, Info, HelpCircle } from "lucide-react"; 
 
 interface ProductAnalysisProps {
   analysis: ProductAnalysisResult;
@@ -29,11 +29,10 @@ export function ProductAnalysis({ analysis }: ProductAnalysisProps) {
                 src={analysis.productImage}
                 alt={analysis.productName}
                 fill
-                className="object-contain" // Changed to object-contain for better image display
-                data-ai-hint="product image" // Generic hint for actual product or placeholder
+                className="object-contain" 
+                data-ai-hint="product photo" 
                 sizes="(max-width: 768px) 100vw, (max-width: 1024px) 40vw, 33vw"
                 onError={(e) => {
-                  // Fallback to placeholder if the primary image fails to load
                   e.currentTarget.srcset = 'https://placehold.co/600x400.png';
                   e.currentTarget.src = 'https://placehold.co/600x400.png';
                 }}
@@ -112,10 +111,14 @@ export function ProductAnalysis({ analysis }: ProductAnalysisProps) {
                 <MessageSquareQuote className="h-7 w-7" />
                 User Review Analysis
             </h2>
-            <div className="text-center py-10 px-4 border-2 border-dashed rounded-lg bg-muted/30">
-                <Info className="h-12 w-12 text-muted-foreground/60 mx-auto mb-3" />
-                <p className="text-lg text-foreground font-medium">Review Analysis Coming Soon</p>
-                <p className="text-sm text-muted-foreground mt-1.5">This feature requires review text input or advanced page parsing. The current analysis focuses on URL-based detection of dark patterns and tricky offers.</p>
+            <div className="text-center py-8 px-6 border-2 border-dashed rounded-lg bg-muted/30">
+                <HelpCircle className="h-12 w-12 text-muted-foreground/50 mx-auto mb-4" />
+                <p className="text-lg text-foreground font-semibold">Review Analysis Requires Review Text</p>
+                <p className="text-sm text-muted-foreground mt-2 max-w-md mx-auto">
+                  To summarize reviews or check for authenticity, the actual review text needs to be extracted from the product page. 
+                  This is a complex step that isn't automatically performed by analyzing the URL alone. 
+                  If review text were available, it could be processed using our AI (e.g., via the <code>summarizeProductReviews</code> flow).
+                </p>
             </div>
           </section>
 
